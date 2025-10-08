@@ -27,4 +27,8 @@ CREATE TABLE products (
 
 COMMIT;
 --ROLLBACK;
+<<<<<<< HEAD
 TRUNCATE orer_products, orders, products, users RESTART IDENTIY CASCADE;
+=======
+TRUNCATE orer_products, orders, products, users RESTART IDENTIY CASCADE;
+>>>>>>> 078a4a698b102aabac12b60b3e9165d3bcacd613

@@ -1,31 +1,21 @@
 {
   "name": "market",
-  "type": "module",
-  "imports": {
-    "#*": "./*.js"
-  },
+  "version": "1.0.0",
+  "description": "Market is a versatile and robust e-commerce platform that allows users to browse\r and purchase a wide selection of products.",
+  "main": "app.js",
   "scripts": {
-    "start": "node --env-file=.env server.js",
-    "dev": "node --watch --env-file=.env server.js",
-    "test": "vitest",
-    "db:schema": "psql -d market -f db/schema.sql",
-    "db:seed": "node --env-file=.env db/seed.js",
-    "db:reset": "npm run db:schema && npm run db:seed"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
   },
-  "engines": {
-    "node": ">=22.0.0"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mhorton-dev/market.git"
   },
-  "dependencies": {
-    "bcrypt": "^5.1.1",
-    "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2",
-    "pg": "^8.14.1",
-    "react": "^19.2.0",
-    "react-router-dom": "^7.9.3",
-    "vite": "^7.1.9"
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mhorton-dev/market/issues"
   },
-  "devDependencies": {
-    "supertest": "^7.1.0",
-    "vitest": "^3.1.2"
-  }
+  "homepage": "https://github.com/mhorton-dev/market#readme"
 }

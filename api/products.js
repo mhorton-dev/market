@@ -26,13 +26,27 @@ router.route("/").get(async (req, res) => {
 router.route("/product/:id").get(async (req, res) => {
   try {
     const user = req.user;
-    const { product_id } = req.params;
-    const product = await getProductById(product_id);
+    const { user_id } = req.params;
+    const product = await getProductById(user_id);
 
     res.status(201).send(product);
   } catch (err) {
     console.error(`Error with /product/:id route: ${err}`);
     res.send(`Error with /product/:id: ${err}`);
+  }
+});
+
+//get product by user_id
+router.route("user/product/:id").get(async (req, res) => {
+  try {
+    const user = req.user;
+    const { user_id } = req.params;
+    const product = await getProductByUserId(user_id);
+
+    res.status(201).send(product);
+  } catch (err) {
+    console.error(`Error with user/product/:id route: ${err}`);
+    res.send(`Error with user/product/:id: ${err}`);
   }
 });
 

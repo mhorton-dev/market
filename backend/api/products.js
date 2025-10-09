@@ -1,75 +1,107 @@
 import express from "express";
 const router = express.Router();
 
-export default router;
-
 import {
   createProduct,
   getProducts,
   getProductById,
+  getProductsByUserId,
   updateProduct,
-} from "../../queries/products.js";
+  insertOrderProduct,
+} from "../queries/products.js";
+
+import { inserOrderProduct } from "../queries/products.js";
 
 //all products
-router.route("/").get(async (req, res) => {
-  try {
-    req.body = {};
-    const products = await getProducts();
-    res.send(products);
-  } catch (err) {
-    console.error(`All games router error: ${err}`);
-    res.send(`All games endpoint error ${err}`);
-  }
-});
+router.get(
+  "/",
+  async(async (req, res) => {
+    try {
+      req.body = {};
+      const products = await getProducts();
+      res.send(products);
+    } catch (err) {
+      console.error(`Error fetching all products: ${err}`);
+      res.send(`Failed to fetch all products ${err}`);
+    }
+  })
+);
 
-//get product by id
-router.route("/product/:id").get(async (req, res) => {
+//get product by product_id
+router.get("/product/:product_id").get(async (req, res) => {
   try {
-    const user = req.user;
-    const { user_id } = req.params;
-    const product = await getProductById(user_id);
+    const { product_id } = req.params;
+    const product = await getProductById(product_id);
 
     res.status(201).send(product);
   } catch (err) {
-    console.error(`Error with /product/:id route: ${err}`);
-    res.send(`Error with /product/:id: ${err}`);
+    console.error(`Error with /product/:product_id route: ${err}`);
+    res.send(`Error with /product/:product_id: ${err}`);
   }
 });
 
-//get product by user_id
-router.route("user/product/:id").get(async (req, res) => {
+//get products by user_id
+router.route("user/:user_id").get(async (req, res) => {
   try {
-    const user = req.user;
     const { user_id } = req.params;
-    const product = await getProductByUserId(user_id);
+    const products = await getProductByUserId(user_id);
 
+    res.json(products);
     res.status(201).send(product);
   } catch (err) {
-    console.error(`Error with user/product/:id route: ${err}`);
-    res.send(`Error with user/product/:id: ${err}`);
-  }
-});
-
-//update product
-router.route("/product/:id").put(async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updatedProduct = await updateProduct(id);
-    return res.status(201).send(updatedProduct);
-  } catch (err) {
-    console.error(`Error on /product:id update route ${err}`);
-    res.send(`Error on product:id update route ${err}`);
+    console.error(`Error with user/product/:product_id route: ${err}`);
+    res.send(`Error with user/product/:product_id: ${err}`);
   }
 });
 
 //create product
-router.post("/product", async (req, res) => {
+router.post("/", async (req, res) => {
   try {
-    const product = createProduct(title, product_description, price);
+    const product = { title, product_description, price };
 
-    return res.status(201).send(product);
+    if (!title || !product_description || !price) {
+      return res
+        .status(400)
+        .json({ error: "Missing required fields in creat fetch" });
+    }
+
+    const peoduct = await createProduct(title, product_description, price);
+
+    res.status(201).send(product);
   } catch (err) {
-    console.error(`route error ${err}`);
+    console.error(`create product route error ${err}`);
     return res.status(500).json(`Error with create product route: ${err}`);
   }
 });
+
+//update product
+router.put("/:product_id", async (req, res) => {
+  try {
+    const { product_id } = req.params;
+    const updatedProduct = await updateProduct(product_id);
+    return res.status(201).send(updatedProduct);
+  } catch (err) {
+    console.error(`Error on /:product_id update route ${err}`);
+    res.send(`Error on /:product_id update route ${err}`);
+  }
+});
+
+//add product to order
+router.post(
+  "/order_id:/products/product_id:",
+  requireUser,
+  async (req, res) => {
+    try {
+      const { orderId, productId } = req.params;
+      const orderProduct = await insertOrderProduct(orderId, productId);
+      res.status(201).json(orderProduct);
+    } catch (err) {
+      console.error(`Error adding product to order route ${err}`);
+      res
+        .status(500)
+        .json({ error: `rror adding product to order route ${err}` });
+    }
+  }
+);
+
+export default router;

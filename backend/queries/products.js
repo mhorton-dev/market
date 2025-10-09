@@ -19,6 +19,7 @@ export async function getProducts() {
   return products;
 }
 
+//get all products
 export async function getProductById(product_id) {
   const sql = `SELECT * FROM products WHERE product_id = $1`;
 

@@ -12,11 +12,11 @@ export async function createOrder(user_id, note) {
 
 export async function insertOrderProduct(order_id, product_id, quantity = 1) {
   const sql = `INSERT INTO orders_products (order_id, product_id, quantity)
-   VALUES ($!, $2, $3) RETURNING *;`;
+   VALUES ($1, $2, $3) RETURNING *;`;
 
   const {
     rows: [orderProduct],
-  } = await db.query(sql, [order, _id, product_id, quantity]);
+  } = await db.query(sql, [order, product_id, quantity]);
 
   return orderProduct;
 }
@@ -32,9 +32,7 @@ export async function getOrders() {
 export async function getOrderById(order_id) {
   const sql = `SELECT * FROM orders WHERE order_id = $1;`;
 
-  const {
-    rows: [order],
-  } = await db.query(sql, [order_id]);
+  const { rows: orders } = await db.query(sql, [order_id]);
 
   return order;
 }

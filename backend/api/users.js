@@ -1,8 +1,6 @@
 import express from "express";
 const router = express.Router();
 
-export default router;
-
 import requireBody from "../middleware/requireBody";
 import requireUser from "../middleware/requireUser";
 
@@ -17,11 +15,10 @@ import {
 import { createToken, verifyToken } from "../utils/jwt.js";
 
 //return all users
-router.route("/").get(async (req, res) => {
+router.get("/").get(async (req, res) => {
   try {
-    req.body = {};
-    const games = await getUsers();
-    res.send(games);
+    const users = await getUsers();
+    res.send(users);
   } catch (err) {
     console.error(`Error with users route ${err}`);
     res.send(`Error with users route ${err}`);
@@ -29,23 +26,28 @@ router.route("/").get(async (req, res) => {
 });
 
 //register user
-router.post("/register", requireBody(["username", "password"]));
-async (req, res) => {
-  try {
-    const { username, password } = req.body;
+router.post(
+  "/register",
+  requireBody(["username", "password"]),
+  async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      const user = await createUser(username, password);
 
-    const user = await createUser(username, password);
+      if (!user || !user.user_id) {
+        return res
+          .status(400)
+          .json({ error: " User registration route failed" });
+      }
 
-    if (!user || !user.user_id) {
-      return res.status(400).json({ error: " User registration failed" });
+      const token = createToken({ id: user.user_id });
+      res.status(201).json({ token });
+    } catch (err) {
+      console.error(`Error registering: ${err}`);
+      res.status(500).json({ error: "Registration route failed" });
     }
-    const token = createToken(user.user_id);
-    res.status(201).json({ token });
-  } catch (err) {
-    console.error(`Error registering: ${err}`);
-    res.status(500).json({ error: "Something went wrong registering user" });
   }
-};
+);
 
 //user login
 router.post(
@@ -65,7 +67,7 @@ router.post(
       res.status(200).json({ token });
     } catch (err) {
       console.error(`Login error" ${err}`);
-      rest.status(500).json({ error: "Something went wrong with user login" });
+      res.status(500).json({ error: "Something went wrong with user login" });
     }
   }
 );
@@ -75,8 +77,8 @@ router.get("/me", requireUser, async (req, res) => {
     const { password, ...safeUser } = req.user; // strip sensitive user data
     res.json(safeUser);
   } catch (err) {
-    console.error("Auth error:", err);
-    res.status(500).json({ error: "Auth error" });
+    console.error("error fetching /me route:", err);
+    res.status(500).json({ error: "error fetching /me route" });
   }
 });
 
@@ -91,28 +93,23 @@ router.put("/me", requireUser, async (req, res) => {
     const updatedUser = await updateUser(userId, updates);
     res.json(updatedUser);
   } catch (err) {
-    console.error("Error in PUT /users/me:", err);
-    res.status(500).json({ error: "Error updating user" });
+    console.error("Error updating /me:", err);
+    res.status(500).json({ error: "Error updating /me:" });
   }
 });
 
-router.put("/edit", async (req, res) => {
+router.put("/edit", requireUser, async (req, res) => {
   try {
-    const { id } = req.user;
-    // const { username, email, favoriteTeam, favoriteConf } = req.body; // Add password later
-    const payload = req.body;
-    const { username, email, favoriteTeam, favoriteConf } = payload;
-
-    const newPayload = {
-      username: username,
-    };
-    console.log("payload", payload);
-    console.log("New payload", newPayload);
-
-    const editedUser = updateUser(user_id, newPayload);
-    res.status(200).send(editedUser);
+    const { user_id } = req.user;
+    const { username } = payload;
+    const newPayload = { username };
+    const editedUser = await updateUser(user_id, newPayload);
+    res.status(200).json(editedUser);
+    res.json(editedUser);
   } catch (err) {
-    console.error(`Error editing user ${err}`);
-    res.send(`Error editing user ${err}`);
+    console.error(`Error editing user /edit ${err}`);
+    res.send(`Error editing user /edit ${err}`);
   }
 });
+
+export default router;

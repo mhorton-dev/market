@@ -8,7 +8,7 @@ import {
   getProducts,
   getProductById,
   updateProduct,
-} from "../queries/products.js";
+} from "../../queries/products.js";
 
 //all products
 router.route("/").get(async (req, res) => {
